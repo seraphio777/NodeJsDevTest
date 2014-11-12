@@ -40,15 +40,11 @@
 
       var c = new ftp_client();
       c.on('ready', function() {
+        c.put(that.config.CSV_File, that.config.CSV_File, function(err) {
+          if (err) throw err;
 
-        c.put(that.CSV_File, that.CSV_File, function(err) {
-          if (err) {
-            throw err;
-          } else {
-            c.end();
-            callback();            
-          }  
-
+          c.end();
+          callback();            
         });
       });
  
