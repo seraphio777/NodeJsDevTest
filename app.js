@@ -4,6 +4,7 @@
   var app = {
     config: require('./config').config,
     csv: require('to-csv'),
+    ftp: require('ftp'),
     fs: require('fs'),
     FB: require('fb'),
 
@@ -33,6 +34,28 @@
     },
 
 
+    Upload: function (callback) {
+      var that = this;
+      var ftp_client = this.ftp; 
+
+      var c = new ftp_client();
+      c.on('ready', function() {
+
+        c.put(that.CSV_File, that.CSV_File, function(err) {
+          if (err) {
+            throw err;
+          } else {
+            c.end();
+            callback();            
+          }  
+
+        });
+      });
+ 
+      c.connect(that.config.FTP);
+    },
+
+
     Save: function (users, callback) {
       this.fs.writeFile(this.config.CSV_File, this.csv(users), function (err) {
         if (err) {
@@ -46,12 +69,20 @@
 
     Run: function (firstID, lastId) {
       var that = this;
+      console.log('Searching users with ids from ' + firstID + ' to ' + lastId + '');
 
       this.Request(firstID, lastId, function (users) {
+        console.log('Fetched ' + users.length + ' users');
+
         that.Save(users, function () {
-          console.log('Saved to csv file "' + that.config.CSV_File + '"');
+          console.log('Saved to csv file "' + that.config.CSV_File + '"');      
+              
+          that.Upload(function () {
+            console.log('File uploaded to FTP');
+          });
         });          
       });
+    
     }
 
   };
