@@ -1,8 +1,11 @@
   // Application "NodeJs Dev Test"
 
+
   var app = {
-    FB: require('fb'),
     config: require('./config').config,
+    csv: require('to-csv'),
+    fs: require('fs'),
+    FB: require('fb'),
 
 
     Request: function (firstID, lastId, callback) {
@@ -30,12 +33,26 @@
     },
 
 
+    Save: function (users, callback) {
+      this.fs.writeFile(this.config.CSV_File, this.csv(users), function (err) {
+        if (err) {
+          console.log('Error saving file: ', err); 
+        } else {
+          callback();
+        }  
+      });
+    },
+
+
     Run: function (firstID, lastId) {
+      var that = this;
+
       this.Request(firstID, lastId, function (users) {
-        console.log(users);
+        that.Save(users, function () {
+          console.log('Saved to csv file "' + that.config.CSV_File + '"');
+        });          
       });
     }
-
 
   };
 
